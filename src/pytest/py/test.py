@@ -31,11 +31,16 @@ def findFile(fname, dirlist):
             f = os.path.join(dir, fname)
             if os.path.isfile(f):
                 return f
+            last = dir
             dir = os.path.dirname(dir)
-        return None
+            if last == dir or 3 > len(dir):
+                break
+    return None
 
 def loadConfig(fname):
     globals()["__info__"] = {}
+    if not fname or not os.path.isfile(fname):
+        return
     with open(fname) as f:
         lines = f.readlines()
         for line in lines:
@@ -65,17 +70,16 @@ def runTests(_p):
     Log("PROJECT DIR : %s" % prjroot)
     Log("------------------------------------------------------------------")
 
-    # Module info
-    # Log(__info__)
-
     # Assert macros
     assert True
     assert not False
 
-    # from slgltf import slgltf
+    Log("Importing slgltf")
     import slgltf
+
+    Log("Checking slgltf")
     if hasattr(slgltf, "slgltf"):
-        slgltf = slgltf.slgltf
+        slgltf = slgltf.slgltf # <-- Debugging case only, don't do this in production
 
     # Show module path
     Log("[%s ] %s" % (slgltf.__name__, slgltf.__file__))

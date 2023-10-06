@@ -19,6 +19,7 @@ include_directories("${CMAKE_CURRENT_SOURCE_DIR}/headers")
 file(GLOB_RECURSE SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/cpp/*.cpp")
 
 add_library(${BINARY} MODULE ${SOURCES})
+
 set_target_properties(${BINARY} PROPERTIES PREFIX "")
 set_target_properties(${BINARY} PROPERTIES SUFFIX "${PYTHON_MODULE_EXTENSION}")
 set_target_properties(${BINARY} PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
@@ -27,7 +28,11 @@ if(DEPENDCHAIN)
     add_dependencies(${BINARY} ${DEPENDCHAIN})
 endif()
 
-# target_link_libraries(${BINARY} PRIVATE $<$<PLATFORM_ID:Windows>:lib>libname_static)
+if(${PYEXT})
+    python_extension_module(${BINARY})
+else()
+    target_link_libraries(${BINARY} PRIVATE ${PYLINK})
+endif()
 
 if(UNIX AND NOT APPLE)
     target_link_libraries(${BINARY} PRIVATE pthread rt)
@@ -43,5 +48,4 @@ add_custom_command(TARGET ${BINARY} POST_BUILD
 
 install(TARGETS ${BINARY} LIBRARY DESTINATION "${PYINSTALL}/${PROJECT_NAME}")
 install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/py/__init__.py" DESTINATION "${PYINSTALL}/${PROJECT_NAME}")
-# install(TARGETS libmembus LIBRARY DESTINATION "${PYINSTALL}/${PROJECT_NAME}")
 

@@ -1,19 +1,19 @@
 #====================================================================
 #
 #   Configure the build
-# $ cmake . -B ./bld  -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release
+# $ cmake . -B ./build  -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release
 #
 #   Execute build
-# $ cmake --build ./bld -j 8
+# $ cmake --build ./build -j 8
 #
 #   Install/Uninstall library
-# $ sudo cmake --install ./bld && sudo ./run.sh uninstall
+# $ sudo cmake --install ./build && sudo ./run.sh uninstall
 #
 #   Clean up build files (uninstall does not work after clean)
 # $ ./clean.sh
 #
 #   Create deb package
-# $ cpack -B ./pck -G DEB -C Release --config ./bld/CPackConfig.cmake
+# $ cpack -B ./pck -G DEB -C Release --config ./build/CPackConfig.cmake
 #
 #   Install/uninstall deb package
 # $ sudo dpkg -i ./pck/slgltf-0.1-Linux.deb && sudo dpkg -r slgltf

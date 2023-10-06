@@ -35,7 +35,7 @@ rmDirs()
 #--------------------------------------------------------------------------------------------------
 
 rmFiles "conan.lock conanbuildinfo.cmake conanbuildinfo.txt conaninfo.txt graph_info.json"
-rmDirs "bld"
+rmDirs "bld build"
 
 
 #--------------------------------------------------------------------------------------------------
@@ -63,7 +63,7 @@ rmDirs "package"
 # skbuild
 #--------------------------------------------------------------------------------------------------
 
-rmDirs "_skbuild dist slgltf.egg-info src/slgltf.egg-info"
+rmDirs "_skbuild dist *.egg-info"
 
 #--------------------------------------------------------------------------------------------------
 # npm
