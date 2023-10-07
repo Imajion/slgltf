@@ -23,15 +23,6 @@ PYBIND11_MODULE(APPNAMERAW, m)
     m.def("version", [] () { return APPVER; });
     m.def("build", [] () { return APPBUILD; });
 
-    // OOP wrapper
-    py::class_<gltf>(m, "gltf")
-        .def(py::init<>())
-        .def("load", &gltf::load)
-        .def("save", &gltf::save)
-        .def("release", &gltf::release)
-        .def("error", &gltf::error)
-        ;
-
     // types
     py::class_<cgltf_size>(m, "cgltf_size")
         .def(py::init<>());
@@ -265,6 +256,26 @@ PYBIND11_MODULE(APPNAMERAW, m)
         .def_readwrite("stride", &cgltf_buffer_view::stride)
         .def_readwrite("type", &cgltf_buffer_view::type)
         .def_readwrite("data", &cgltf_buffer_view::data)
+        // .def_property("dataFloat",
+        //     [](const cgltf_buffer_view &v) -> py::array_t<float> {
+        //         char* raw = v.data ? (char*)v.data : (char*)v.buffer->data;
+        //         float *data = (float*)(raw + v.offset);
+        //         return py::array_t<float>(v.size, data);
+        //     },
+        //     [](cgltf_buffer_view &v, py::array_t<float> value) {
+        //         auto r = value.unchecked<1>();
+        //         char* raw = v.data ? (char*)v.data : (char*)v.buffer->data;
+        //         float *data = (float*)(raw + v.offset);
+        //         size_t size = v.size / sizeof(float);
+        //         if (size != r.size())
+        //         {
+        //             throw std::runtime_error("Mismatched array sizes");
+        //         }
+        //         for (size_t i = 0; i < v.size / sizeof(float); ++i)
+        //         {
+        //             data[i] = r(i);
+        //         }
+        //     })
         .def_readwrite("has_meshopt_compression", &cgltf_buffer_view::has_meshopt_compression)
         .def_readwrite("meshopt_compression", &cgltf_buffer_view::meshopt_compression)
         .def_readwrite("extras", &cgltf_buffer_view::extras)
@@ -641,8 +652,15 @@ PYBIND11_MODULE(APPNAMERAW, m)
         .def_readwrite("type", &cgltf_primitive::type)
         .def_readwrite("indices", &cgltf_primitive::indices)
         .def_readwrite("material", &cgltf_primitive::material)
-        .def_readwrite("attributes", &cgltf_primitive::attributes)
+        // .def_readwrite("attributes", &cgltf_primitive::attributes)
         .def_readwrite("attributes_count", &cgltf_primitive::attributes_count)
+        .def_property_readonly("attributes", [](const cgltf_primitive &a) -> py::list {
+            py::list attributes_list;
+            for (size_t i = 0; i < a.attributes_count; ++i) {
+                attributes_list.append(py::cast(a.attributes[i]));
+            }
+            return attributes_list;
+        })
         .def_readwrite("targets", &cgltf_primitive::targets)
         .def_readwrite("targets_count", &cgltf_primitive::targets_count)
         .def_readwrite("extras", &cgltf_primitive::extras)
@@ -658,6 +676,41 @@ PYBIND11_MODULE(APPNAMERAW, m)
             }
             return extensions_list;
         });
+
+        // cgltf_mesh
+        py::class_<cgltf_mesh>(m, "cgltf_mesh")
+            .def(py::init<>())
+            .def_readwrite("name", &cgltf_mesh::name)
+            // .def_property_readonly("primitives", [](const cgltf_mesh &mesh) -> py::array_t<cgltf_primitive*> {
+            //     return py::array_t<cgltf_primitive*>(mesh.primitives_count, mesh.primitives);
+            // })
+            .def_readonly("primitives_count", &cgltf_mesh::primitives_count)
+            .def_property_readonly("primitives", [](const cgltf_mesh &a) -> py::list {
+                py::list primitives_list;
+                for (size_t i = 0; i < a.primitives_count; ++i) {
+                    primitives_list.append(py::cast(a.primitives[i]));
+                }
+                return primitives_list;
+            })
+
+            .def_property_readonly("weights", [](const cgltf_mesh &mesh) -> py::array_t<cgltf_float> {
+                return py::array_t<cgltf_float>(mesh.weights_count, mesh.weights);
+            })
+            .def_readonly("weights_count", &cgltf_mesh::weights_count)
+            // .def_property_readonly("target_names", [](const cgltf_mesh &mesh) -> py::array_t<char*> {
+            //     return py::array_t<char*>(mesh.target_names_count, mesh.target_names);
+            // })
+            .def_readonly("target_names_count", &cgltf_mesh::target_names_count)
+            .def_readwrite("extras", &cgltf_mesh::extras)
+            // .def_property_readonly("extensions", [](const cgltf_mesh &mesh) -> py::array_t<cgltf_extension*> {
+            //     return py::array_t<cgltf_extension*>(mesh.extensions_count, mesh.extensions);
+            // })
+            // .def_property_readonly("extensions", [](const cgltf_mesh &mesh) {
+            //     return std::vector<cgltf_extension*>(mesh.extensions, mesh.extensions + mesh.extensions_count);
+            // })
+            .def_readonly("extensions_count", &cgltf_mesh::extensions_count);
+
+
 
     // cgltf_skin
     py::class_<cgltf_skin>(m, "cgltf_skin")
@@ -876,10 +929,17 @@ PYBIND11_MODULE(APPNAMERAW, m)
         .def_readwrite("file_data", &cgltf_data::file_data)
         .def_readwrite("asset", &cgltf_data::asset)
         .def_readwrite("meshes_count", &cgltf_data::meshes_count)
-        .def_property_readonly("meshes", [](const cgltf_data &a) -> py::list {
-            py::list meshes_list;
+        // .def_property_readonly("meshes", [](const cgltf_data &a) -> py::list {
+        //     py::list meshes_list;
+        //     for (size_t i = 0; i < a.meshes_count; ++i) {
+        //         meshes_list.append(py::cast(a.meshes[i]));
+        //     }
+        //     return meshes_list;
+        // })
+        .def_property_readonly("meshes", [](const cgltf_data &a) {
+            py::list meshes_list(a.meshes_count);
             for (size_t i = 0; i < a.meshes_count; ++i) {
-                meshes_list.append(py::cast(a.meshes[i]));
+                meshes_list[i] = py::cast(a.meshes[i]);
             }
             return meshes_list;
         })
@@ -1078,6 +1138,18 @@ PYBIND11_MODULE(APPNAMERAW, m)
         },
         "Free data", py::arg("data")
     );
+
+    // OOP wrapper
+    py::class_<gltf>(m, "gltf")
+        .def(py::init<>())
+        .def("load", &gltf::load)
+        .def("save", &gltf::save)
+        .def("release", &gltf::release)
+        .def("error", &gltf::error)
+        .def("data", &gltf::data, py::return_value_policy::reference);
+        // .def("data", [](gltf& self) {
+        //     return py::capsule(self.data(), "cgltf_data", (void(*)(void *))nullptr);
+        // });
 
 }
 

@@ -23,7 +23,13 @@ public:
     void release();
 
     /// Get error string
-    const std::string &error() const { return m_sError; }
+    const std::string& error() const { return m_sError; }
+
+    /// Get gltf data
+    cgltf_data* data() const { return m_data; }
+
+    /// Get gltf options
+    cgltf_options* options() { return &m_options; }
 
 private:
 

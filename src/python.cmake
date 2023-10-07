@@ -17,8 +17,11 @@ if(${PYVER} MATCHES "=")
     endif()
 endif()
 
-# The new, new way to find python
-find_package(PythonExtensions)
+if (APPLE)
+    # Seems to only work on macos atm
+    find_package(PythonExtensions)
+endif()
+
 if(${PYTHONLIBS_FOUND})
     set(PYEXT "YES")
     set(PYINC ${PYTHON_INCLUDE_DIRS})

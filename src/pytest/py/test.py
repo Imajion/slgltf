@@ -88,7 +88,9 @@ def runTests(_p):
     Log("[version] %s [%s]" % (slgltf.__version__, slgltf.__build__))
 
     datadir = os.path.join(prjroot, "data")
-    assert os.path.isdir(datadir)
+    if not os.path.isdir(datadir):
+        Log(f"Data directory not found: {datadir}")
+        assert False
 
     # Get a list of files in testdir that don't start with _
     testfiles = [f for f in os.listdir(datadir) if os.path.isfile(os.path.join(datadir, f)) and not f.startswith("_")]
@@ -99,6 +101,8 @@ def runTests(_p):
     # Test with oop wrapper
     Log("----------------------------------------")
     Log("Testing oop wrapper")
+    Log("----------------------------------------")
+
     for f in testfiles:
         full = os.path.join(datadir, f)
         out = os.path.join(datadir, f"_{f}")
@@ -114,9 +118,11 @@ def runTests(_p):
             Log(f"Saved gltf file: {out}")
 
 
-    # Test with static methods
+    # # Test with static methods
     # Log("----------------------------------------")
     # Log("Testing static methods")
+    # Log("----------------------------------------")
+
     # for f in testfiles:
     #     full = os.path.join(datadir, f)
     #     out = os.path.join(datadir, f"_{f}")
@@ -129,9 +135,50 @@ def runTests(_p):
     #             assert False
     #         Log(f"Loaded gltf file: {full}")
 
+    # Iterate objects
+    Log("----------------------------------------")
+    Log("Iterating objects")
+    Log("----------------------------------------")
+
+    for f in testfiles:
+        full = os.path.join(datadir, f)
+        out = os.path.join(datadir, f"_{f}")
+        if os.path.isfile(full):
+
+            gltf = slgltf.gltf()
+            if not gltf.load(full):
+                Log(f"Failed to load gltf file: {full}")
+                assert False
+            Log(f"Loaded gltf file: {full}")
+
+            data = gltf.data()
+            if not data:
+                Log(f"Failed to get gltf data")
+                assert False
+
+            Log(f"Mesh count: {data.meshes_count}")
+            Log(f"meshes: {len(data.meshes)}")
+
+            for mesh in data.meshes:
+                Log(f"Mesh: {mesh.name}")
+                for prim in mesh.primitives:
+                    Log(f"  Primitive Type: {prim.type}")
+                    Log(f"  Attributes: {len(prim.attributes)}")
+                    for attr in prim.attributes:
+                        Log(f"    {attr.name}")
+                        if attr.data:
+                            Log(f"      Data: {attr.data.count}/{attr.data.stride}={attr.data.count/attr.data.stride if attr.data.stride else 0}")
+                            if attr.data.buffer_view:
+                                Log(f"        BView Type  : {attr.data.buffer_view.type}")
+                                Log(f"        BView Offset: {attr.data.buffer_view.offset}")
+                                Log(f"        BView Size  : {attr.data.buffer_view.size}/{attr.data.buffer_view.stride}={attr.data.buffer_view.size/attr.data.buffer_view.stride if attr.data.buffer_view.stride else 0}")
+                                # Log(f"        Data Size   : {len(attr.data.buffer_view.dataFloat)}")
+                                # Log(f"        Data        : {attr.data.buffer_view.dataFloat}")
+                                if attr.data.buffer_view.buffer:
+                                    Log(f"          Buffer Size  : {attr.data.buffer_view.buffer.size}")
+
 
     Log("--- SUCCESS --- ")
-
 
 
 def main():
