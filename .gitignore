@@ -163,3 +163,5 @@ Thumbs.db
 !/ios-moe/xcode/*.xcodeproj/project.pbxproj
 /ios-moe/xcode/native/
 
+
+tests/glTF-Sample-Models
