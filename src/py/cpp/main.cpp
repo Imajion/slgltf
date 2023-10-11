@@ -256,26 +256,49 @@ PYBIND11_MODULE(APPNAMERAW, m)
         .def_readwrite("stride", &cgltf_buffer_view::stride)
         .def_readwrite("type", &cgltf_buffer_view::type)
         .def_readwrite("data", &cgltf_buffer_view::data)
-        // .def_property("dataFloat",
-        //     [](const cgltf_buffer_view &v) -> py::array_t<float> {
-        //         char* raw = v.data ? (char*)v.data : (char*)v.buffer->data;
-        //         float *data = (float*)(raw + v.offset);
-        //         return py::array_t<float>(v.size, data);
-        //     },
-        //     [](cgltf_buffer_view &v, py::array_t<float> value) {
-        //         auto r = value.unchecked<1>();
-        //         char* raw = v.data ? (char*)v.data : (char*)v.buffer->data;
-        //         float *data = (float*)(raw + v.offset);
-        //         size_t size = v.size / sizeof(float);
-        //         if (size != r.size())
-        //         {
-        //             throw std::runtime_error("Mismatched array sizes");
-        //         }
-        //         for (size_t i = 0; i < v.size / sizeof(float); ++i)
-        //         {
-        //             data[i] = r(i);
-        //         }
-        //     })
+/*        .def_property("dataFloat",
+            [](const cgltf_buffer_view &v) -> py::array_t<float> {
+                char* raw = v.data ? (char*)v.data : (char*)v.buffer->data;
+                float *data = (float*)(raw + v.offset);
+                cgltf_size sz = cgltf_num_components(v.type);
+                if (v.size % (sz * sizeof(float)) != 0) {
+                    throw std::runtime_error("Buffer view size is not a multiple of the component size");
+                }
+                // return py::array_t<float>(v.size / sizeof(float), data);
+                return py::array_t<float>({v.size / sizeof(float) / sz, sz}, data);
+            },
+            [](cgltf_buffer_view &v, py::array_t<float> value) {
+                char* raw = v.data ? (char*)v.data : (char*)v.buffer->data;
+                float *data = (float*)(raw + v.offset);
+                size_t expectedFloats = v.size / sizeof(float);
+
+                if (value.ndim() == 1) {
+                    auto r = value.unchecked<1>();
+                    if (r.size() != expectedFloats) {
+                        throw std::runtime_error("Mismatched array sizes");
+                    }
+                    for (size_t i = 0; i < r.size(); ++i) {
+                        data[i] = r(i);
+                    }
+                }
+                else if (value.ndim() == 2) {
+                    auto r = value.unchecked<2>();
+                    size_t totalFloats = r.shape(0) * r.shape(1);
+                    if (totalFloats != expectedFloats) {
+                        throw std::runtime_error("Mismatched array sizes");
+                    }
+                    size_t index = 0;
+                    for (ssize_t i = 0; i < r.shape(0); ++i) {
+                        for (ssize_t j = 0; j < r.shape(1); ++j) {
+                            data[index++] = r(i, j);
+                        }
+                    }
+                }
+                else {
+                    throw std::runtime_error("Array dimensions must be 1 or 2");
+                }
+            })
+*/
         .def_readwrite("has_meshopt_compression", &cgltf_buffer_view::has_meshopt_compression)
         .def_readwrite("meshopt_compression", &cgltf_buffer_view::meshopt_compression)
         .def_readwrite("extras", &cgltf_buffer_view::extras)
@@ -312,6 +335,76 @@ PYBIND11_MODULE(APPNAMERAW, m)
         .def_readwrite("count", &cgltf_accessor::count)
         .def_readwrite("stride", &cgltf_accessor::stride)
         .def_readwrite("buffer_view", &cgltf_accessor::buffer_view)
+        .def_property("dataFloat",
+            [](const cgltf_accessor &v) -> py::array_t<float>
+            {
+                if (v.component_type != cgltf_component_type_r_32f)
+                {   throw std::runtime_error("Accessor component type is not float32");
+                }
+
+                if (v.is_sparse || 0 >= v.count)
+                    return py::array_t<float>();
+
+                cgltf_size sz = cgltf_num_components(v.type);
+                uint8_t *view = v.buffer_view ? const_cast<uint8_t*>(cgltf_buffer_view_data(v.buffer_view)) : nullptr;
+                if (view == nullptr)
+                    if (1 == sz)
+                        return py::array_t<float>(v.count, nullptr);
+                    else
+                        return py::array_t<float>({v.count / sz, sz}, nullptr);
+
+                float *data = reinterpret_cast<float*>(view + v.offset);
+                if ((v.offset + v.count * sizeof(float)) > v.buffer_view->size)
+                {   throw std::runtime_error("Accessor data out of range");
+                }
+
+                if (v.count % sz != 0)
+                {   throw std::runtime_error("Buffer view size is not a multiple of the component size");
+                }
+
+                return py::array_t<float>({v.count / sz, sz}, data, py::capsule(data, [](void* data) {}));
+            },
+            [](cgltf_accessor &v, py::array_t<float> value)
+            {
+                if (v.component_type != cgltf_component_type_r_32f)
+                {   throw std::runtime_error("Accessor component type is not float32");
+                }
+
+                if (v.is_sparse || 0 >= v.count)
+                    return;
+
+                cgltf_size sz = cgltf_num_components(v.type);
+                uint8_t *view = v.buffer_view ? const_cast<uint8_t*>(cgltf_buffer_view_data(v.buffer_view)) : nullptr;
+                if (view == nullptr)
+                    return;
+
+                float *data = reinterpret_cast<float*>(view + v.offset);
+                if (value.ndim() == 1) {
+                    auto r = value.unchecked<1>();
+                    if (r.size() != v.count) {
+                        throw std::runtime_error("Mismatched array sizes");
+                    }
+                    for (size_t i = 0; i < r.size(); ++i) {
+                        data[i] = r(i);
+                    }
+                }
+                else if (value.ndim() == 2) {
+                    auto r = value.unchecked<2>();
+                    size_t totalFloats = r.shape(0) * r.shape(1);
+                    if (totalFloats != v.count) {
+                        throw std::runtime_error("Mismatched array sizes");
+                    }
+                    size_t index = 0;
+                    for (ssize_t i = 0; i < r.shape(0); ++i) {
+                        for (ssize_t j = 0; j < r.shape(1); ++j) {
+                            data[index++] = r(i, j);
+                        }
+                    }
+                }
+                else {
+                    throw std::runtime_error("Array dimensions must be 1 or 2");
+                }
+            })
         .def_readwrite("has_min", &cgltf_accessor::has_min)
         .def_property("min",
             [](const cgltf_accessor &a) -> py::array_t<cgltf_float>
@@ -652,7 +745,6 @@ PYBIND11_MODULE(APPNAMERAW, m)
         .def_readwrite("type", &cgltf_primitive::type)
         .def_readwrite("indices", &cgltf_primitive::indices)
         .def_readwrite("material", &cgltf_primitive::material)
-        // .def_readwrite("attributes", &cgltf_primitive::attributes)
         .def_readwrite("attributes_count", &cgltf_primitive::attributes_count)
         .def_property_readonly("attributes", [](const cgltf_primitive &a) -> py::list {
             py::list attributes_list;
@@ -681,9 +773,6 @@ PYBIND11_MODULE(APPNAMERAW, m)
         py::class_<cgltf_mesh>(m, "cgltf_mesh")
             .def(py::init<>())
             .def_readwrite("name", &cgltf_mesh::name)
-            // .def_property_readonly("primitives", [](const cgltf_mesh &mesh) -> py::array_t<cgltf_primitive*> {
-            //     return py::array_t<cgltf_primitive*>(mesh.primitives_count, mesh.primitives);
-            // })
             .def_readonly("primitives_count", &cgltf_mesh::primitives_count)
             .def_property_readonly("primitives", [](const cgltf_mesh &a) -> py::list {
                 py::list primitives_list;
@@ -929,13 +1018,6 @@ PYBIND11_MODULE(APPNAMERAW, m)
         .def_readwrite("file_data", &cgltf_data::file_data)
         .def_readwrite("asset", &cgltf_data::asset)
         .def_readwrite("meshes_count", &cgltf_data::meshes_count)
-        // .def_property_readonly("meshes", [](const cgltf_data &a) -> py::list {
-        //     py::list meshes_list;
-        //     for (size_t i = 0; i < a.meshes_count; ++i) {
-        //         meshes_list.append(py::cast(a.meshes[i]));
-        //     }
-        //     return meshes_list;
-        // })
         .def_property_readonly("meshes", [](const cgltf_data &a) {
             py::list meshes_list(a.meshes_count);
             for (size_t i = 0; i < a.meshes_count; ++i) {
@@ -1069,12 +1151,10 @@ PYBIND11_MODULE(APPNAMERAW, m)
         .def_readwrite("extensions_used_count", &cgltf_data::extensions_used_count)
         //.def_readwrite("extensions_required", &cgltf_data::extensions_required)
         .def_readwrite("extensions_required_count", &cgltf_data::extensions_required_count)
-        // .def_readwrite("json", &cgltf_data::json)
         .def_readwrite("json_size", &cgltf_data::json_size)
         .def_property_readonly("json", [](const cgltf_data& self) {
             return py::str(self.json, self.json_size);
         })
-        // .def_readwrite("bin", &cgltf_data::bin)
         .def_readwrite("bin_size", &cgltf_data::bin_size)
         .def_property_readonly("bin", [](const cgltf_data& self) {
             return py::bytes(static_cast<const char*>(self.bin), self.bin_size);

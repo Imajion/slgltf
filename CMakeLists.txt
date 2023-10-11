@@ -68,7 +68,7 @@ endif()
 
 #====================================================================
 # Custom
-add_definitions(-DGLTF_DOUBLE_PRECISION)
+#add_definitions(-DGLTF_DOUBLE_PRECISION)
 
 
 #====================================================================

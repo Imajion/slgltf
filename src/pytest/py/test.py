@@ -156,6 +156,8 @@ def runTests(_p):
                 Log(f"Failed to get gltf data")
                 assert False
 
+            Log(f"Data: {data}")
+
             Log(f"Mesh count: {data.meshes_count}")
             Log(f"meshes: {len(data.meshes)}")
 
@@ -163,17 +165,25 @@ def runTests(_p):
                 Log(f"Mesh: {mesh.name}")
                 for prim in mesh.primitives:
                     Log(f"  Primitive Type: {prim.type}")
-                    Log(f"  Attributes: {len(prim.attributes)}")
+                    Log(f"  Attributes    : {len(prim.attributes)}")
                     for attr in prim.attributes:
                         Log(f"    {attr.name}")
                         if attr.data:
-                            Log(f"      Data: {attr.data.count}/{attr.data.stride}={attr.data.count/attr.data.stride if attr.data.stride else 0}")
+                            Log(f"      Type      : {attr.data.type}")
+                            Log(f"      Count     : {attr.data.count}")
+                            Log(f"      Stride    : {attr.data.stride}")
+                            dFloat = attr.data.dataFloat
+                            Log(f"      Shape     : {dFloat.shape}")
+
+                            # !!! Attempt to modify the first element of the data
+                            # dFloat[0] = numpy.arange(1, dFloat.shape[1]+1, dtype=float)
+
+                            Log(f"      Data Size : {len(dFloat)}")
+                            Log(f"      Data      : {attr.data.dataFloat}")
                             if attr.data.buffer_view:
                                 Log(f"        BView Type  : {attr.data.buffer_view.type}")
                                 Log(f"        BView Offset: {attr.data.buffer_view.offset}")
                                 Log(f"        BView Size  : {attr.data.buffer_view.size}/{attr.data.buffer_view.stride}={attr.data.buffer_view.size/attr.data.buffer_view.stride if attr.data.buffer_view.stride else 0}")
-                                # Log(f"        Data Size   : {len(attr.data.buffer_view.dataFloat)}")
-                                # Log(f"        Data        : {attr.data.buffer_view.dataFloat}")
                                 if attr.data.buffer_view.buffer:
                                     Log(f"          Buffer Size  : {attr.data.buffer_view.buffer.size}")
 

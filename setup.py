@@ -45,7 +45,9 @@ setup(
     license=cfg['license'],
     include_package_data = True,
     long_description=long_description,
-    long_description_content_type='text/markdown'
+    long_description_content_type='text/markdown',
+    setup_requires=['numpy'],
+    install_requires=['numpy', 'trimesh']
     # packages=[],
     # install_requires=[],
     # cmake_args=['-DPYVER==%s' % platform.python_version()],
