@@ -67,6 +67,13 @@ bool gltf::save(const std::string &filename)
         return false;
     }
 
+    std::string strFilename = filename;
+    std::transform(strFilename.begin(), strFilename.end(), strFilename.begin(), ::tolower);
+    if (strFilename.size() > 4 && strFilename.substr(filename.size() - 4) == ".glb")
+        m_options.type = cgltf_file_type_glb;
+    else
+        m_options.type = cgltf_file_type_gltf;
+
     cgltf_result result = cgltf_write_file(&m_options, filename.c_str(), m_data);
     if (result != cgltf_result_success)
     {
