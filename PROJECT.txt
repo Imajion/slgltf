@@ -1,4 +1,4 @@
-name            slgltf
+name            pyglTFast
 version         0.1.1
 description     Python wrapper for cgltf (https://github.com/jkuhlmann/cgltf)
 company         Sitelink

@@ -74,18 +74,18 @@ def runTests(_p):
     assert True
     assert not False
 
-    Log("Importing slgltf")
-    import slgltf
+    Log("Importing pyglTFast")
+    import pyglTFast
 
-    Log("Checking slgltf")
-    if hasattr(slgltf, "slgltf"):
-        slgltf = slgltf.slgltf # <-- Debugging case only, don't do this in production
+    Log("Checking pyglTFast")
+    if hasattr(pyglTFast, "pyglTFast"):
+        pyglTFast = pyglTFast.pyglTFast # <-- Debugging case only, don't do this in production
 
     # Show module path
-    Log("[%s ] %s" % (slgltf.__name__, slgltf.__file__))
+    Log("[%s ] %s" % (pyglTFast.__name__, pyglTFast.__file__))
 
     # Show module version
-    Log("[version] %s [%s]" % (slgltf.__version__, slgltf.__build__))
+    Log("[version] %s [%s]" % (pyglTFast.__version__, pyglTFast.__build__))
 
     datadir = os.path.join(prjroot, "data")
     if not os.path.isdir(datadir):
@@ -107,7 +107,7 @@ def runTests(_p):
         full = os.path.join(datadir, f)
         out = os.path.join(datadir, f"_{f}")
         if os.path.isfile(full):
-            gltf = slgltf.gltf()
+            gltf = pyglTFast.gltf()
             if not gltf.load(full):
                 Log(f"Failed to load gltf file: {full}")
                 assert False
@@ -128,9 +128,9 @@ def runTests(_p):
     #     out = os.path.join(datadir, f"_{f}")
     #     if os.path.isfile(full):
 
-    #         options = slgltf.cgltf_options
-    #         [res, data] = slgltf.cgltf_parse_file(options, full)
-    #         if res != slgltf.cgltf_result_success:
+    #         options = pyglTFast.cgltf_options
+    #         [res, data] = pyglTFast.cgltf_parse_file(options, full)
+    #         if res != pyglTFast.cgltf_result_success:
     #             Log(f"Failed to load gltf file: {full}")
     #             assert False
     #         Log(f"Loaded gltf file: {full}")
@@ -145,7 +145,7 @@ def runTests(_p):
         out = os.path.join(datadir, f"_{f}")
         if os.path.isfile(full):
 
-            gltf = slgltf.gltf()
+            gltf = pyglTFast.gltf()
             if not gltf.load(full):
                 Log(f"Failed to load gltf file: {full}")
                 assert False

@@ -1,5 +1,5 @@
 import os
-import slgltf
+import pyglTFast
 
 def setup_module(module):
     """ setup any state specific to the execution of the given module."""
@@ -17,7 +17,10 @@ def setup_module(module):
 
 
 def test_import():
-    gltf = slgltf.slgltf.gltf()
-    gltf.load('./glTF-Sample-Models/2.0/Box/glTF/Box.gltf')
-    data = gltf.data()
-    print(dir(data))
+    help(pyglTFast)
+    # gltf = pyglTFast.
+    # gltf.load('./glTF-Sample-Models/2.0/Box/glTF/Box.gltf')
+    # data = gltf.data()
+    # buffer_view = prim.attributes[1].data.buffer_view
+
+    # print(dir(data))

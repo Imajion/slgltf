@@ -2,7 +2,7 @@
 
 #--------------------------------------------------------------------------------------------------
 # Where are the help files?
-APPNAME="slgltf"
+APPNAME="pyglTFast"
 LINK="${ROOTDIR}/bld/html/index.html"
 
 if [ ! -f "$LINK" ]; then

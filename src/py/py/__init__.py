@@ -1,5 +1,5 @@
 import os
-from . import slgltf
+from . import pyglTFast
 
 def findFile(fname, dirlist):
     if not isinstance(dirlist, list):

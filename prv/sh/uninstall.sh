@@ -1,6 +1,6 @@
 #!/bin/bash
 
-APPNAME="slgltf"
+APPNAME="pygltFast"
 
 #--------------------------------------------------------------------------------------------------
 if findIn "dpkg -l" "${APPNAME}"; then

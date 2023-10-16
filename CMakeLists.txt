@@ -16,15 +16,15 @@
 # $ cpack -B ./pck -G DEB -C Release --config ./build/CPackConfig.cmake
 #
 #   Install/uninstall deb package
-# $ sudo dpkg -i ./pck/slgltf-0.1-Linux.deb && sudo dpkg -r slgltf
+# $ sudo dpkg -i ./pck/pyglTFast-0.1-Linux.deb && sudo dpkg -r pyglTFast
 #   or
-# $ sudo apt install ./pck/slgltf-0.1-Linux.deb && sudo apt remove slgltf
+# $ sudo apt install ./pck/pyglTFast-0.1-Linux.deb && sudo apt remove pyglTFast
 #
 #   Get compiler opts
-# $ pkg-config --cflags slgltf
+# $ pkg-config --cflags pyglTFast
 #
 #   Get linker opts
-# $ pkg-config --libs slgltf
+# $ pkg-config --libs pyglTFast
 #
 #====================================================================
 
