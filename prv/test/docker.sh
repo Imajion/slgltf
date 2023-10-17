@@ -133,7 +133,7 @@ if [[ $1 == "test-pip" ]]; then
 
     # export PYTHONPATH=${PYTHONPATH}:/usr/local/
 
-    # python3 ./src/pytest/py/test.py
+    # python3 ./pyglTFast/pytest/pyglTFast/test.pyglTFast
     # exitOnError "test-pip: Failed to pass test"
 
     pip3 uninstall -y ${APPNAME}

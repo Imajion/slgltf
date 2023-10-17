@@ -2,9 +2,9 @@
 
 # https://scikit-build.readthedocs.io/en/latest/usage.html
 
-# pip install . && ./test/test.py
-# ./clean.sh && ./setup.py bdist_wheel
-# ./clean.sh && ./setup.py sdist
+# pip install . && ./test/test.pyglTFast
+# ./clean.sh && ./setup.pyglTFast bdist_wheel
+# ./clean.sh && ./setup.pyglTFast sdist
 # python3 -m twine upload -r testpypi dist/*
 # python3 -m twine upload dist/*
 
@@ -47,8 +47,8 @@ setup(
     long_description=long_description,
     long_description_content_type='text/markdown',
     setup_requires=['numpy'],
-    install_requires=['numpy', 'trimesh']
-    # packages=[],
+    install_requires=['numpy', 'trimesh'],
+    packages=['pyglTFast'],
     # install_requires=[],
     # cmake_args=['-DPYVER==%s' % platform.python_version()],
 )

@@ -1,5 +1,6 @@
 import os
-import pyglTFast
+from py import pyglTFast
+
 
 def setup_module(module):
     """ setup any state specific to the execution of the given module."""

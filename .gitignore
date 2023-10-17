@@ -165,3 +165,6 @@ Thumbs.db
 
 
 tests/glTF-Sample-Models
+
+
+pyglTFast.cpython*

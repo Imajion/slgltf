@@ -28,7 +28,7 @@
 
 
 #--------------------------------------------------------------------------------------------------
-APPNAME="slgltf"
+APPNAME="pyglTFast"
 SCRIPTPATH=$(realpath ${BASH_SOURCE[0]})
 ROOTDIR=$(dirname $SCRIPTPATH)
 if [[ ! -d "$ROOTDIR" ]]; then

@@ -5,9 +5,9 @@
 
 #====================================================================
 set(DEPENDCHAIN "")
-include(../python.cmake)
-include(../pybind11.cmake)
-include(../cgltf.cmake)
+include(./python.cmake)
+include(./pybind11.cmake)
+include(./cgltf.cmake)
 
 
 #====================================================================
@@ -47,5 +47,5 @@ add_custom_command(TARGET ${BINARY} POST_BUILD
 # Install
 
 install(TARGETS ${BINARY} LIBRARY DESTINATION "${PYINSTALL}/${PROJECT_NAME}")
-install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/py/__init__.py" DESTINATION "${PYINSTALL}/${PROJECT_NAME}")
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/__init__.py" DESTINATION "${PYINSTALL}/${PROJECT_NAME}")
 
