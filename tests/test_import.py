@@ -19,8 +19,9 @@ def setup_module(module):
 
 def test_import():
     gltf = pyglTFast
-    gltf.load('./glTF-Sample-Models/2.0/Box/glTF/Box.gltf')
-    data = gltf.data()
-    buffer_view = prim.attributes[1].data.buffer_view
-
-    print(dir(data))
+    scene = gltf.load('./glTF-Sample-Models/2.0/Box/glTF/Box.gltf')
+    scene.export('./tmp/box_out.glb')
+    # data = gltf.data()
+    # buffer_view = prim.attributes[1].data.buffer_view
+    #
+    # print(dir(data))

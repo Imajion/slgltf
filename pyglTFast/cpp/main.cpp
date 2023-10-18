@@ -335,7 +335,73 @@ PYBIND11_MODULE(APPNAMERAW, m)
         .def_readwrite("count", &cgltf_accessor::count)
         .def_readwrite("stride", &cgltf_accessor::stride)
         .def_readwrite("buffer_view", &cgltf_accessor::buffer_view)
-        .def_property("dataFloat",
+        .def_property("dataInt",
+            [](const cgltf_accessor &v) -> py::array_t<int>
+            {
+                if (v.component_type != cgltf_component_type_r_16u)  // Assume this is the correct enum value for int32.
+                    throw std::runtime_error("Accessor component type is not int32");
+
+                if (v.is_sparse || 0 >= v.count)
+                    return py::array_t<int>();
+
+                cgltf_size sz = cgltf_num_components(v.type);
+                uint8_t *view = v.buffer_view ? const_cast<uint8_t*>(cgltf_buffer_view_data(v.buffer_view)) : nullptr;
+                if (view == nullptr)
+                    if (1 == sz)
+                        return py::array_t<int>(v.count, nullptr);
+                    else
+                        return py::array_t<int>({v.count / sz, sz}, nullptr);
+
+                int *data = reinterpret_cast<int*>(view + v.offset);
+                if ((v.offset + v.count * sizeof(int)) > v.buffer_view->size)
+                    throw std::runtime_error("Accessor data out of range");
+
+                if (v.count % sz != 0)
+                    throw std::runtime_error("Buffer view size is not a multiple of the component size");
+
+                return py::array_t<int>({v.count / sz, sz}, data, py::capsule(data, [](void* data) {}));
+            },
+            [](cgltf_accessor &v, py::array_t<int> value)
+            {
+                if (v.component_type != cgltf_component_type_r_16u)
+                    throw std::runtime_error("Accessor component type is not int32");
+
+                if (v.is_sparse || 0 >= v.count)
+                    return;
+
+                cgltf_size sz = cgltf_num_components(v.type);
+                uint8_t *view = v.buffer_view ? const_cast<uint8_t*>(cgltf_buffer_view_data(v.buffer_view)) : nullptr;
+                if (view == nullptr)
+                    return;
+
+                int *data = reinterpret_cast<int*>(view + v.offset);
+                if (value.ndim() == 1) {
+                    auto r = value.unchecked<1>();
+                    if (r.size() != v.count) {
+                        throw std::runtime_error("Mismatched array sizes");
+                    }
+                    for (size_t i = 0; i < r.size(); ++i) {
+                        data[i] = r(i);
+                    }
+                }
+                else if (value.ndim() == 2) {
+                    auto r = value.unchecked<2>();
+                    size_t totalInts = r.shape(0) * r.shape(1);
+                    if (totalInts != v.count) {
+                        throw std::runtime_error("Mismatched array sizes");
+                    }
+                    size_t index = 0;
+                    for (ssize_t i = 0; i < r.shape(0); ++i) {
+                        for (ssize_t j = 0; j < r.shape(1); ++j) {
+                            data[index++] = r(i, j);
+                        }
+                    }
+                }
+                else {
+                    throw std::runtime_error("Array dimensions must be 1 or 2");
+                }
+            })
+            .def_property("dataFloat",
             [](const cgltf_accessor &v) -> py::array_t<float>
             {
                 if (v.component_type != cgltf_component_type_r_32f)
@@ -882,7 +948,20 @@ PYBIND11_MODULE(APPNAMERAW, m)
         .def(py::init<>())
         .def_readwrite("name", &cgltf_node::name)
         .def_readwrite("parent", &cgltf_node::parent)
-        // .def_readwrite("children", &cgltf_node::children)
+        .def_property("children",
+                       [](const cgltf_node &n) -> py::list {
+                           py::list children_list;
+                           for (size_t i = 0; i < n.children_count; ++i) {
+                               children_list.append(py::cast(n.children[i]));
+                           }
+                           return children_list;
+                       }, [](cgltf_node &n, py::list value) {
+                           n.children_count = value.size();
+                           n.children = new cgltf_node*[n.children_count];
+                           for (size_t i = 0; i < n.children_count; ++i) {
+                               n.children[i] = value[i].cast<cgltf_node*>();
+                           }
+                       })
         .def_readwrite("children_count", &cgltf_node::children_count)
         .def_readwrite("skin", &cgltf_node::skin)
         .def_readwrite("mesh", &cgltf_node::mesh)
