@@ -1,6 +1,6 @@
 import os
 import pyglTFast
-
+import trimesh
 
 def setup_module(module):
     """ setup any state specific to the execution of the given module."""
@@ -18,10 +18,7 @@ def setup_module(module):
 
 
 def test_import():
-    gltf = pyglTFast
-    scene = gltf.load('./glTF-Sample-Models/2.0/Box/glTF/Box.gltf')
+
+    t_scene = trimesh.load('./glTF-Sample-Models/2.0/Box/glTF/Box.gltf')
+    scene = pyglTFast.load('./glTF-Sample-Models/2.0/Box/glTF/Box.gltf')
     scene.export('./tmp/box_out.glb')
-    # data = gltf.data()
-    # buffer_view = prim.attributes[1].data.buffer_view
-    #
-    # print(dir(data))

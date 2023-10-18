@@ -14,6 +14,9 @@ def add_nodes(scene: trimesh.Scene, node, node_count=0, parent_name=None):
         for primitive in node.mesh.primitives:
 
             indices = primitive.indices
+            faces = indices.dataUShort
+            face_count = len(faces) // 3
+            faces = faces.reshape((face_count, 3))
 
             vertices = None
             normals = None
@@ -25,7 +28,7 @@ def add_nodes(scene: trimesh.Scene, node, node_count=0, parent_name=None):
                     normals = attr.data.dataFloat
 
             if vertices is not None and normals is not None:
-                mesh = trimesh.Trimesh(vertices=vertices, normals=normals)
+                mesh = trimesh.Trimesh(vertices=vertices, normals=normals, faces=faces, process=False)
                 scene.add_geometry(mesh, node_name=node_name, parent_node_name=parent_name)
 
     for child in node.children:

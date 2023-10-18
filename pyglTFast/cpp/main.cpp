@@ -335,33 +335,34 @@ PYBIND11_MODULE(APPNAMERAW, m)
         .def_readwrite("count", &cgltf_accessor::count)
         .def_readwrite("stride", &cgltf_accessor::stride)
         .def_readwrite("buffer_view", &cgltf_accessor::buffer_view)
-        .def_property("dataInt",
-            [](const cgltf_accessor &v) -> py::array_t<int>
+        .def_property("dataUShort",
+            [](const cgltf_accessor &v) -> py::array_t<uint16_t>
             {
                 if (v.component_type != cgltf_component_type_r_16u)  // Assume this is the correct enum value for int32.
                     throw std::runtime_error("Accessor component type is not int32");
 
                 if (v.is_sparse || 0 >= v.count)
-                    return py::array_t<int>();
+                    return py::array_t<uint16_t>();
 
                 cgltf_size sz = cgltf_num_components(v.type);
-                uint8_t *view = v.buffer_view ? const_cast<uint8_t*>(cgltf_buffer_view_data(v.buffer_view)) : nullptr;
+                const uint8_t *temp_view = cgltf_buffer_view_data(v.buffer_view);
+                uint16_t *view = v.buffer_view ? reinterpret_cast<uint16_t*>(const_cast<uint8_t*>(temp_view)) : nullptr;
                 if (view == nullptr)
                     if (1 == sz)
-                        return py::array_t<int>(v.count, nullptr);
+                        return py::array_t<uint16_t>(v.count, nullptr);
                     else
-                        return py::array_t<int>({v.count / sz, sz}, nullptr);
+                        return py::array_t<uint16_t>({v.count / sz, sz}, nullptr);
 
-                int *data = reinterpret_cast<int*>(view + v.offset);
-                if ((v.offset + v.count * sizeof(int)) > v.buffer_view->size)
+                uint16_t *data = reinterpret_cast<uint16_t*>(view + v.offset);
+                if ((v.offset + v.count * sizeof(uint16_t)) > v.buffer_view->size)
                     throw std::runtime_error("Accessor data out of range");
 
                 if (v.count % sz != 0)
                     throw std::runtime_error("Buffer view size is not a multiple of the component size");
 
-                return py::array_t<int>({v.count / sz, sz}, data, py::capsule(data, [](void* data) {}));
+                return py::array_t<uint16_t>({v.count / sz, sz}, data, py::capsule(data, [](void* data) {}));
             },
-            [](cgltf_accessor &v, py::array_t<int> value)
+            [](cgltf_accessor &v, py::array_t<uint16_t> value)
             {
                 if (v.component_type != cgltf_component_type_r_16u)
                     throw std::runtime_error("Accessor component type is not int32");
@@ -370,11 +371,12 @@ PYBIND11_MODULE(APPNAMERAW, m)
                     return;
 
                 cgltf_size sz = cgltf_num_components(v.type);
-                uint8_t *view = v.buffer_view ? const_cast<uint8_t*>(cgltf_buffer_view_data(v.buffer_view)) : nullptr;
+                const uint8_t *temp_view = cgltf_buffer_view_data(v.buffer_view);
+                uint16_t *view = v.buffer_view ? reinterpret_cast<uint16_t*>(const_cast<uint8_t*>(temp_view)) : nullptr;
                 if (view == nullptr)
                     return;
 
-                int *data = reinterpret_cast<int*>(view + v.offset);
+                uint16_t *data = reinterpret_cast<uint16_t*>(view + v.offset);
                 if (value.ndim() == 1) {
                     auto r = value.unchecked<1>();
                     if (r.size() != v.count) {
@@ -417,7 +419,7 @@ PYBIND11_MODULE(APPNAMERAW, m)
                     if (1 == sz)
                         return py::array_t<float>(v.count, nullptr);
                     else
-                        return py::array_t<float>({v.count / sz, sz}, nullptr);
+                        return py::array_t<float>({v.count, sz}, nullptr);
 
                 float *data = reinterpret_cast<float*>(view + v.offset);
                 if ((v.offset + v.count * sizeof(float)) > v.buffer_view->size)
@@ -428,7 +430,7 @@ PYBIND11_MODULE(APPNAMERAW, m)
                 {   throw std::runtime_error("Buffer view size is not a multiple of the component size");
                 }
 
-                return py::array_t<float>({v.count / sz, sz}, data, py::capsule(data, [](void* data) {}));
+                return py::array_t<float>({v.count, sz}, data, py::capsule(data, [](void* data) {}));
             },
             [](cgltf_accessor &v, py::array_t<float> value)
             {

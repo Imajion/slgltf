@@ -169,3 +169,4 @@ tests/glTF-Sample-Models
 
 pyglTFast.cpython*
 tests/tmp
+pyglTFastLib.cpython*
