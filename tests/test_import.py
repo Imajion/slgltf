@@ -18,7 +18,5 @@ def setup_module(module):
 
 
 def test_import():
-
-    t_scene = trimesh.load('./glTF-Sample-Models/2.0/Box/glTF/Box.gltf')
     scene = pyglTFast.load('./glTF-Sample-Models/2.0/Box/glTF/Box.gltf')
     scene.export('./tmp/box_out.glb')
