@@ -77,8 +77,11 @@ file(READ "PROJECT.txt" CFGSTR)
 string(REPLACE "\r" "\n" CFGSTR ${CFGSTR})
 set(CFGSTR "\n${CFGSTR}")
 
-string(REGEX MATCH "[\n]name[ \t]*([^\n]*)" _ ${CFGSTR})
+string(REGEX MATCH "[\n]libname[ \t]*([^\n]*)" _ ${CFGSTR})
 string(STRIP ${CMAKE_MATCH_1} APPNAME)
+
+string(REGEX MATCH "[\n]libname[ \t]*([^\n]*)" _ ${CFGSTR})
+string(STRIP ${CMAKE_MATCH_1} LIBNAME)
 
 string(REGEX MATCH "[\n]version[ \t]*([^\n]*)" _ ${CFGSTR})
 string(STRIP ${CMAKE_MATCH_1} APPVER)

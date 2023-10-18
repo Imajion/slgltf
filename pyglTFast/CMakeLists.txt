@@ -46,6 +46,6 @@ add_custom_command(TARGET ${BINARY} POST_BUILD
 #====================================================================
 # Install
 
-install(TARGETS ${BINARY} LIBRARY DESTINATION "${PYINSTALL}/${PROJECT_NAME}")
-install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/__init__.py" DESTINATION "${PYINSTALL}/${PROJECT_NAME}")
+install(TARGETS ${BINARY} LIBRARY DESTINATION PROJECT_NAME)
+#install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/__init__.py" DESTINATION "${PYINSTALL}/${PROJECT_NAME}")
 

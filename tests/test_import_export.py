@@ -1,5 +1,5 @@
 import os
-from py import pyglTFast
+import pyglTFast
 
 
 def setup_module(module):
@@ -18,10 +18,9 @@ def setup_module(module):
 
 
 def test_import():
-    help(pyglTFast)
-    # gltf = pyglTFast.
-    # gltf.load('./glTF-Sample-Models/2.0/Box/glTF/Box.gltf')
-    # data = gltf.data()
-    # buffer_view = prim.attributes[1].data.buffer_view
+    gltf = pyglTFast
+    gltf.load('./glTF-Sample-Models/2.0/Box/glTF/Box.gltf')
+    data = gltf.data()
+    buffer_view = prim.attributes[1].data.buffer_view
 
-    # print(dir(data))
+    print(dir(data))
