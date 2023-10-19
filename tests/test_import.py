@@ -20,12 +20,13 @@ def setup_module(module):
 def test_import():
     #t_scene = trimesh.load('./glTF-Sample-Models/2.0/2CylinderEngine/glTF/2CylinderEngine.gltf')
 
-    # box_scene = pyglTFast.load('./glTF-Sample-Models/2.0/Duck/glTF/Duck.gltf')
-    # box_scene.export('./tmp/duck.glb')
+    box_scene = pyglTFast.load('./glTF-Sample-Models/2.0/Duck/glTF/Duck.gltf')
+    box_scene.export('./tmp/duck.glb')
     #
     # box_scene = pyglTFast.load('./glTF-Sample-Models/2.0/Box/glTF/Box.gltf')
     # box_scene.export('./tmp/box.glb')
 
-    scene = pyglTFast.load('./glTF-Sample-Models/building-001.glb')
+    #scene = trimesh.load('./glTF-Sample-Models/building-001.glb')
+    #scene = pyglTFast.load('./glTF-Sample-Models/building-001.glb')
     scene = pyglTFast.load('./glTF-Sample-Models/2.0/2CylinderEngine/glTF/2CylinderEngine.gltf')
     scene.export('./tmp/engine.glb')
