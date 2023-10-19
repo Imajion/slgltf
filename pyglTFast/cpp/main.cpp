@@ -1218,6 +1218,26 @@ PYBIND11_MODULE(APPNAMERAW, m)
             }
             return buffers_list;
         })
+        .def("append_buffer", [](cgltf_data &data, const cgltf_buffer& new_buffer) {
+            // Increase the buffers_count
+            size_t new_count = data.buffers_count + 1;
+
+            // Reallocate the memory for the new size
+            cgltf_buffer* new_buffers = (cgltf_buffer*) realloc(data.buffers, new_count * sizeof(cgltf_buffer));
+
+            if (!new_buffers) {
+                throw std::runtime_error("Failed to allocate memory for new buffer.");
+            }
+
+            // Update the pointer (since realloc might move the memory)
+            data.buffers = new_buffers;
+
+            // Copy the new buffer data to the last position (this assumes shallow copy is okay)
+            data.buffers[data.buffers_count] = new_buffer;
+
+            // Update the count
+            data.buffers_count = new_count;
+        })
         .def_readwrite("images_count", &cgltf_data::images_count)
         .def_property_readonly("images", [](const cgltf_data &a) -> py::list {
             py::list images_list;

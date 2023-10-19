@@ -6,6 +6,12 @@ import pyglTFastLib
 from helper import create_wkwargs
 
 
+def slice(path: os.PathLike, output_dir: os.PathLike):
+    gltf = pyglTFastLib.gltf()
+    gltf.load(str(path))
+    data = gltf.data
+
+
 def load(path: os.PathLike) -> trimesh.Scene:
     gltf = pyglTFastLib.gltf()
     gltf.load(str(path))
@@ -72,6 +78,8 @@ def export(scene, path):
             c_faces_accessor.component_type = pyglTFastLib.cgltf_component_type.r_16u
 
             c_primitive.indices = c_faces_accessor
+            c_faces_accessor.buffer_view = pyglTFastLib.cgltf_buffer_view()
+            c_faces_accessor.buffer_view.buffer = pyglTFastLib.cgltf_buffer()
             c_faces_accessor.dataUShort = tri_mesh.faces.flatten()
 
             # Vertex attributes
@@ -83,6 +91,9 @@ def export(scene, path):
             c_vertex_accessor = pyglTFastLib.cgltf_accessor()
             c_vertex_accessor.type = pyglTFastLib.cgltf_type.vec3
             c_vertex_accessor.component_type = pyglTFastLib.cgltf_component_type.r_32f
+            c_vertex_accessor.buffer_view = pyglTFastLib.cgltf_buffer_view()
+            c_vertex_accessor.buffer_view.buffer = pyglTFastLib.cgltf_buffer()
+
             c_vertex_accessor.dataFloat = tri_mesh.vertices
 
             c_vertex_attribute.data = c_vertex_accessor
@@ -96,12 +107,19 @@ def export(scene, path):
             c_normal_accessor = pyglTFastLib.cgltf_accessor()
             c_normal_accessor.type = pyglTFastLib.cgltf_type.vec3
             c_normal_accessor.component_type = pyglTFastLib.cgltf_component_type.r_32f
+            c_normal_accessor.buffer_view = pyglTFastLib.cgltf_buffer_view()
+            c_normal_accessor.buffer_view.buffer = pyglTFastLib.cgltf_buffer()
             c_normal_accessor.dataFloat = tri_mesh.vertex_normals
             c_normal_attribute.data = c_normal_accessor
 
             c_data.append_accessor(c_vertex_accessor)
             c_data.append_accessor(c_normal_accessor)
             c_data.append_accessor(c_faces_accessor)
+
+            #c_data.append_buffer(c_faces_accessor.buffer_view.buffer)
+            #c_data.append_buffer(c_vertex_accessor.buffer_view.buffer)
+            #c_data.append_buffer(c_normal_accessor.buffer_view.buffer)
+
             c_mesh.primitives.append(c_primitive)
 
             c_child.mesh = c_mesh
