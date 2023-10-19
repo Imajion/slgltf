@@ -154,8 +154,7 @@ def create_wkwargs(data):
 def primitive_to_kwarg(primitive):
     indices = primitive.indices
     faces = indices.dataUShort
-    face_count = len(faces) // 3
-    faces = faces.reshape((face_count, 3))
+    faces = faces.reshape((-1, 3))
 
     vertices = None
     normals = None
@@ -177,55 +176,3 @@ def primitive_to_kwarg(primitive):
         }
         return geometry_kwargs
     return None
-
-def add_nodes(kwargs: dict, node, node_count=0, parent_name=None, indent=0):
-    node_name = f'node_{node_count}'
-    graph_kwargs = {}
-
-    spaces = ' ' * indent
-    print(f'{spaces} parent {parent_name} > node {node_name}')
-
-    if not parent_name:
-        graph_kwargs.update({
-            'frame_to': node_name,
-            'matrix': node.matrix.reshape((4, 4)),
-        })
-    else:
-        graph_kwargs.update({
-            'frame_from': parent_name,
-            'frame_to': node_name,
-            'matrix': node.matrix.reshape((4, 4))
-        })
-
-    if node.mesh:
-
-        geometry_name = node.mesh.name
-        graph_kwargs.update({'geometry': geometry_name})
-        for primitive in node.mesh.primitives:
-
-            indices = primitive.indices
-            faces = indices.dataUShort
-            face_count = len(faces) // 3
-            faces = faces.reshape((face_count, 3))
-
-            vertices = None
-            normals = None
-
-            for attr in primitive.attributes:
-                if attr.type.name == 'position':
-                    vertices = attr.data.dataFloat
-                    continue
-                if attr.type.name == 'normal':
-                    normals = attr.data.dataFloat
-                    continue
-
-            if vertices is not None and normals is not None:
-                geometry_kwargs = {'vertices': vertices, 'faces': faces, 'normals': normals, 'process': False}
-                kwargs['geometry'][geometry_name] = geometry_kwargs
-
-    kwargs['graph'].insert(0, graph_kwargs)
-
-    indent += 4
-    # for child in node.children:
-    #     node_count += 1
-    #     add_nodes(kwargs, child, node_count, node_name, indent)

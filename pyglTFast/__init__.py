@@ -3,7 +3,7 @@ import os
 import trimesh
 import pyglTFastLib
 
-from helper import add_nodes, create_wkwargs
+from helper import create_wkwargs
 
 
 def load(path: os.PathLike) -> trimesh.Scene:

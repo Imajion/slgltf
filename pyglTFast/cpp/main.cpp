@@ -353,7 +353,7 @@ PYBIND11_MODULE(APPNAMERAW, m)
                     else
                         return py::array_t<uint16_t>({v.count / sz, sz}, nullptr);
 
-                uint16_t *data = reinterpret_cast<uint16_t*>(view + v.offset);
+                uint16_t *data = reinterpret_cast<uint16_t*>(reinterpret_cast<uint8_t*>(view) + v.offset);
                 if ((v.offset + v.count * sizeof(uint16_t)) > v.buffer_view->size)
                     throw std::runtime_error("Accessor data out of range");
 
@@ -376,7 +376,7 @@ PYBIND11_MODULE(APPNAMERAW, m)
                 if (view == nullptr)
                     return;
 
-                uint16_t *data = reinterpret_cast<uint16_t*>(view + v.offset);
+                uint16_t *data = reinterpret_cast<uint16_t*>(reinterpret_cast<uint8_t*>(view) + v.offset);
                 if (value.ndim() == 1) {
                     auto r = value.unchecked<1>();
                     if (r.size() != v.count) {
