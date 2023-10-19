@@ -19,8 +19,8 @@ def create_wkwargs(data):
     name_index = {}
 
     for i, n in enumerate(nodes):
-        name = n.name or str(i)
-        name_index[name] = i
+        name = str(i)
+        name_index[name] = n
 
     names = {v: k for k, v in name_index.items()}
 
@@ -52,9 +52,9 @@ def create_wkwargs(data):
             # parent name is the base frame
             parent_name = names[base_frame]
         else:
-            parent_name = names[nodes.index(a)]
+            parent_name = names[a]
 
-        child_name = names[nodes.index(child)]
+        child_name = names[child]
 
         # dict of child node
         # parent = nodes[a]

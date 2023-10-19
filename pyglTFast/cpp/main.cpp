@@ -954,7 +954,7 @@ PYBIND11_MODULE(APPNAMERAW, m)
                        [](const cgltf_node &n) -> py::list {
                            py::list children_list;
                            for (size_t i = 0; i < n.children_count; ++i) {
-                               children_list.append(py::cast(n.children[i]));
+                               children_list.append(py::cast(n.children[i], py::return_value_policy::reference));
                            }
                            return children_list;
                        }, [](cgltf_node &n, py::list value) {
