@@ -1182,6 +1182,26 @@ PYBIND11_MODULE(APPNAMERAW, m)
             }
             return accessors_list;
         })
+        .def("append_accessor", [](cgltf_data &data, const cgltf_accessor& new_accessor) {
+            // Increase the nodes_count
+            size_t new_count = data.accessors_count + 1;
+
+            // Reallocate the memory for the new size
+            cgltf_accessor* new_accessors = (cgltf_accessor*) realloc(data.accessors, new_count * sizeof(cgltf_accessor));
+
+            if (!new_accessors) {
+                throw std::runtime_error("Failed to allocate memory for new node.");
+            }
+
+            // Update the pointer (since realloc might move the memory)
+            data.accessors = new_accessors;
+
+            // Copy the new node data to the last position (this assumes shallow copy is okay)
+            data.accessors[data.accessors_count] = new_accessor;
+
+            // Update the count
+            data.accessors_count = new_count;
+        })
         .def_readwrite("buffer_views_count", &cgltf_data::buffer_views_count)
         .def_property_readonly("buffer_views", [](const cgltf_data &a) -> py::list {
             py::list buffer_views_list;

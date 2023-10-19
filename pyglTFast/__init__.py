@@ -67,12 +67,12 @@ def export(scene, path):
             c_primitive = pyglTFastLib.cgltf_primitive()
 
             # Faces accessor
-            c_accessor_attribute = pyglTFastLib.cgltf_accessor()
-            c_accessor_attribute.type = pyglTFastLib.cgltf_type.scalar
-            c_accessor_attribute.component_type = pyglTFastLib.cgltf_component_type.r_16u
+            c_faces_accessor = pyglTFastLib.cgltf_accessor()
+            c_faces_accessor.type = pyglTFastLib.cgltf_type.scalar
+            c_faces_accessor.component_type = pyglTFastLib.cgltf_component_type.r_16u
 
-            c_primitive.indices = c_accessor_attribute
-            c_accessor_attribute.dataUShort = tri_mesh.faces.flatten()
+            c_primitive.indices = c_faces_accessor
+            c_faces_accessor.dataUShort = tri_mesh.faces.flatten()
 
             # Vertex attributes
             c_vertex_attribute = pyglTFastLib.cgltf_attribute()
@@ -99,6 +99,9 @@ def export(scene, path):
             c_normal_accessor.dataFloat = tri_mesh.vertex_normals
             c_normal_attribute.data = c_normal_accessor
 
+            c_data.append_accessor(c_vertex_accessor)
+            c_data.append_accessor(c_normal_accessor)
+            c_data.append_accessor(c_faces_accessor)
             c_mesh.primitives.append(c_primitive)
 
             c_child.mesh = c_mesh
