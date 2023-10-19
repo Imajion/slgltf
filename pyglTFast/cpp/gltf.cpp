@@ -22,10 +22,10 @@ gltf::~gltf()
 
 void gltf::release()
 {
-    if (m_data)
-        cgltf_free(m_data), m_data = nullptr;
-
-    memset(&m_options, 0, sizeof(m_options));
+//    if (m_data)
+//        cgltf_free(m_data), m_data = nullptr;
+//
+//    memset(&m_options, 0, sizeof(m_options));
 }
 
 bool gltf::load(const std::string &filename)

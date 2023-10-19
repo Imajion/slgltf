@@ -28,6 +28,9 @@ public:
     /// Get gltf data
     cgltf_data* data() const { return m_data; }
 
+    /// Set gltf data
+    void setData(cgltf_data* data) { m_data = data; }  // This is the setter
+
     /// Get gltf options
     cgltf_options* options() { return &m_options; }
 

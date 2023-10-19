@@ -338,7 +338,7 @@ PYBIND11_MODULE(APPNAMERAW, m)
         .def_property("dataUShort",
             [](const cgltf_accessor &v) -> py::array_t<uint16_t>
             {
-                if (v.component_type != cgltf_component_type_r_16u)  // Assume this is the correct enum value for int32.
+                if (v.component_type != "cgltf_component_type_r_16u")  // Assume this is the correct enum value for int32.
                     throw std::runtime_error("Accessor component type is not int32");
 
                 if (v.is_sparse || 0 >= v.count)
@@ -949,7 +949,7 @@ PYBIND11_MODULE(APPNAMERAW, m)
     py::class_<cgltf_node>(m, "cgltf_node")
         .def(py::init<>())
         .def_readwrite("name", &cgltf_node::name)
-        .def_readwrite("parent", &cgltf_node::parent)
+        .def_readwrite("parent", &cgltf_node::parent, py::return_value_policy::reference)
         .def_property("children",
                        [](const cgltf_node &n) -> py::list {
                            py::list children_list;
@@ -964,6 +964,22 @@ PYBIND11_MODULE(APPNAMERAW, m)
                                n.children[i] = value[i].cast<cgltf_node*>();
                            }
                        })
+        .def("append_child", [](cgltf_node &n, cgltf_node* child) {
+            cgltf_node** new_children_array = new cgltf_node*[n.children_count + 1];
+
+            // Copy old children pointers
+            for (size_t i = 0; i < n.children_count; ++i) {
+                new_children_array[i] = n.children[i];
+            }
+
+            // Append the new child
+            new_children_array[n.children_count] = child;
+
+            // Clean up old array and update pointers
+            delete[] n.children;
+            n.children = new_children_array;
+            n.children_count += 1;
+        }, "Appends a child node to this node.")
         .def_readwrite("children_count", &cgltf_node::children_count)
         .def_readwrite("skin", &cgltf_node::skin)
         .def_readwrite("mesh", &cgltf_node::mesh)
@@ -1039,6 +1055,25 @@ PYBIND11_MODULE(APPNAMERAW, m)
                     s.nodes[i] = value[i].cast<cgltf_node*>();
                 }
             })
+            .def("append_node", [](cgltf_scene &s, cgltf_node* new_node) {
+                // Allocate new array of node pointers
+                cgltf_node** new_nodes_array = new cgltf_node*[s.nodes_count + 1];
+
+                // Copy old node pointers to the new array
+                for (size_t i = 0; i < s.nodes_count; ++i) {
+                    new_nodes_array[i] = s.nodes[i];
+                }
+
+                // Append the new node pointer to the end of the new array
+                new_nodes_array[s.nodes_count] = new_node;
+
+                // Clean up old array and update the nodes pointer in cgltf_scene
+                delete[] s.nodes;
+                s.nodes = new_nodes_array;
+
+                // Update the node count
+                s.nodes_count += 1;
+            }, "Appends a new node to the nodes array.")
         .def_readwrite("nodes_count", &cgltf_scene::nodes_count)
         .def_readwrite("extras", &cgltf_scene::extras)
         .def_readwrite("extensions_count", &cgltf_scene::extensions_count)
@@ -1215,6 +1250,25 @@ PYBIND11_MODULE(APPNAMERAW, m)
             }
             return scenes_list;
         })
+        .def("append_scene", [](cgltf_data &a, cgltf_scene* new_scene) {
+            // Allocate new array of scene pointers
+            cgltf_scene** new_scenes_array = new cgltf_scene*[a.scenes_count + 1];
+
+            // Copy old scene pointers to the new array
+            for (size_t i = 0; i < a.scenes_count; ++i) {
+                new_scenes_array[i] = &a.scenes[i];
+            }
+
+            // Append the new scene pointer to the end of the new array
+            new_scenes_array[a.scenes_count] = new_scene;
+
+            // Clean up old array and update the scenes pointer in cgltf_data
+            delete[] a.scenes;
+            a.scenes = *new_scenes_array;
+
+            // Update the scene count
+            a.scenes_count += 1;
+        }, "Appends a new scene to the scenes array.")
         .def_readwrite("scene", &cgltf_data::scene)
         .def_readwrite("animations_count", &cgltf_data::animations_count)
         .def_property_readonly("animations", [](const cgltf_data &a) -> py::list {
@@ -1320,11 +1374,21 @@ PYBIND11_MODULE(APPNAMERAW, m)
         .def("save", &gltf::save)
         .def("release", &gltf::release)
         .def("error", &gltf::error)
-        .def("data", &gltf::data, py::return_value_policy::reference);
-        // .def("data", [](gltf& self) {
-        //     return py::capsule(self.data(), "cgltf_data", (void(*)(void *))nullptr);
-        // });
-
+        .def_property("data",
+            [](const gltf &g) -> py::object {
+                cgltf_data* data_ptr = g.data();
+                if (data_ptr != nullptr)
+                    return py::cast(data_ptr);
+                else
+                    return py::none();
+            },
+            [](gltf &g, py::object value) {
+                if (value.is_none())
+                    g.setData(nullptr);
+                else
+                    g.setData(value.cast<cgltf_data*>());
+            }
+        );
 }
 
 }; // end namespace

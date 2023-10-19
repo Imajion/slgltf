@@ -17,4 +17,4 @@ def test_export_box():
     transform = trimesh.transformations.translation_matrix([4, 0, 0])
     scene.add_geometry(box, transform=transform, node_name='box')
 
-    pyglTFast.export(scene, 'tmp/box.glb')
+    pyglTFast.export(scene, 'tmp/box.gltf')
