@@ -338,7 +338,7 @@ PYBIND11_MODULE(APPNAMERAW, m)
         .def_property("dataUShort",
             [](const cgltf_accessor &v) -> py::array_t<uint16_t>
             {
-                if (v.component_type != "cgltf_component_type_r_16u")  // Assume this is the correct enum value for int32.
+                if (v.component_type != cgltf_component_type_r_16u)  // Assume this is the correct enum value for int32.
                     throw std::runtime_error("Accessor component type is not int32");
 
                 if (v.is_sparse || 0 >= v.count)
@@ -1133,8 +1133,20 @@ PYBIND11_MODULE(APPNAMERAW, m)
     py::class_<cgltf_asset>(m, "cgltf_asset")
         .def(py::init<>())
         .def_readwrite("copyright", &cgltf_asset::copyright)
-        .def_readwrite("generator", &cgltf_asset::generator)
-        .def_readwrite("version", &cgltf_asset::version)
+        .def_property("generator",
+                      [](const cgltf_asset& asset) -> std::string {
+                          return asset.generator ? std::string(asset.generator) : "";
+                      },
+                      [](cgltf_asset& asset, const std::string& value) {
+                          asset.generator = strdup(value.c_str());
+                      })
+        .def_property("version",
+                      [](const cgltf_asset& asset) -> std::string {
+                          return asset.version ? std::string(asset.version) : "";
+                      },
+                      [](cgltf_asset& asset, const std::string& value) {
+                          asset.version = strdup(value.c_str());
+                      })
         .def_readwrite("min_version", &cgltf_asset::min_version)
         .def_readwrite("extras", &cgltf_asset::extras)
         .def_readwrite("extensions_count", &cgltf_asset::extensions_count)
