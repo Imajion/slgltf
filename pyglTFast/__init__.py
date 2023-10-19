@@ -43,6 +43,8 @@ def export(scene, path):
     c_scene.append_node(c_root)
     c_scene.nodes_count = 1
 
+    c_data.append_node(c_root)
+
     for edge_key in edge_data.keys():
         (parent, child) = edge_key
         edge = edge_data[edge_key]
@@ -51,6 +53,7 @@ def export(scene, path):
         c_child = pyglTFastLib.cgltf_node()
         c_child.parent = c_parent
         c_parent.append_child(c_child)
+        c_data.append_node(c_child)
 
         if 'matrix' in edge:
             matrix = edge['matrix']

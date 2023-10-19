@@ -1254,6 +1254,26 @@ PYBIND11_MODULE(APPNAMERAW, m)
             }
             return nodes_list;
         })
+        .def("append_node", [](cgltf_data &data, const cgltf_node& new_node) {
+            // Increase the nodes_count
+            size_t new_count = data.nodes_count + 1;
+
+            // Reallocate the memory for the new size
+            cgltf_node* new_nodes = (cgltf_node*) realloc(data.nodes, new_count * sizeof(cgltf_node));
+
+            if (!new_nodes) {
+                throw std::runtime_error("Failed to allocate memory for new node.");
+            }
+
+            // Update the pointer (since realloc might move the memory)
+            data.nodes = new_nodes;
+
+            // Copy the new node data to the last position (this assumes shallow copy is okay)
+            data.nodes[data.nodes_count] = new_node;
+
+            // Update the count
+            data.nodes_count = new_count;
+        })
         .def_readwrite("scenes_count", &cgltf_data::scenes_count)
         .def_property_readonly("scenes", [](const cgltf_data &a) -> py::list {
             py::list scenes_list;
