@@ -426,9 +426,9 @@ PYBIND11_MODULE(APPNAMERAW, m)
                 {   throw std::runtime_error("Accessor data out of range");
                 }
 
-                if (v.count % sz != 0)
-                {   throw std::runtime_error("Buffer view size is not a multiple of the component size");
-                }
+//                if (v.count % sz != 0)
+//                {   throw std::runtime_error("Buffer view size is not a multiple of the component size");
+//                }
 
                 return py::array_t<float>({v.count, sz}, data, py::capsule(data, [](void* data) {}));
             },
@@ -1025,7 +1025,20 @@ PYBIND11_MODULE(APPNAMERAW, m)
     py::class_<cgltf_scene>(m, "cgltf_scene")
         .def(py::init<>())
         .def_readwrite("name", &cgltf_scene::name)
-        // .def_readwrite("nodes", &cgltf_scene::nodes)
+        .def_property("nodes",
+            [](const cgltf_scene &s) -> py::list {
+                py::list nodes_list;
+                for (size_t i = 0; i < s.nodes_count; ++i) {
+                    nodes_list.append(py::cast(s.nodes[i], py::return_value_policy::reference));
+                }
+                return nodes_list;
+            }, [](cgltf_scene &s, py::list value) {
+                s.nodes_count = value.size();
+                s.nodes = new cgltf_node*[s.nodes_count];
+                for (size_t i = 0; i < s.nodes_count; ++i) {
+                    s.nodes[i] = value[i].cast<cgltf_node*>();
+                }
+            })
         .def_readwrite("nodes_count", &cgltf_scene::nodes_count)
         .def_readwrite("extras", &cgltf_scene::extras)
         .def_readwrite("extensions_count", &cgltf_scene::extensions_count)
@@ -1190,7 +1203,7 @@ PYBIND11_MODULE(APPNAMERAW, m)
         .def_property_readonly("nodes", [](const cgltf_data &a) -> py::list {
             py::list nodes_list;
             for (size_t i = 0; i < a.nodes_count; ++i) {
-                nodes_list.append(py::cast(a.nodes[i]));
+                nodes_list.append(py::cast(a.nodes[i], py::return_value_policy::reference));
             }
             return nodes_list;
         })

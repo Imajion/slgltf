@@ -3,19 +3,17 @@ import os
 import trimesh
 import pyglTFastLib
 
-from helper import add_nodes
+from helper import add_nodes, create_wkwargs
 
 
 def load(path: os.PathLike) -> trimesh.Scene:
     gltf = pyglTFastLib.gltf()
     gltf.load(str(path))
     data = gltf.data()
-    root = data.nodes[0]
 
-    scene = trimesh.Scene()
+    kwargs = create_wkwargs(data)
 
-    add_nodes(scene, root)
-
+    scene = trimesh.exchange.load.load_kwargs(**kwargs)
     return scene
 
 
